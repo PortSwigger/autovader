@@ -6,6 +6,7 @@ import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 import burp.auto.vader.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,6 +61,29 @@ public class AutoVaderActions {
         executeScan(urls, (urlList, canary) -> {
             String payload = settings.getString("Payload");
             List<String> enumeratedUrls = Utils.enumerateQueryParameters(urlList, canary, payload);
+            api.logging().logToOutput("Urls:" + enumeratedUrls);
+            if (enumeratedUrls.isEmpty()) {
+                api.logging().logToOutput("No query parameters found to scan");
+            }
+            return enumeratedUrls;
+        }, ScanType.QUERY_PARAMS);
+    }
+
+    /**
+     * Scan all GET parameters for gadgets
+     */
+    public void scanAllQueryParametersForGadgets(List<String> urls) {
+        executeScan(urls, (urlList, canary) -> {
+            List<String> enumeratedUrls = new ArrayList<>();
+            String[] htmlTags = settings.getString("HTML tags to scan").split(",");
+            String[] htmlAttributes = settings.getString("Attributes to scan").split(",");
+            for (String htmlTag : htmlTags) {
+                for (String htmlAttribute : htmlAttributes) {
+                    String payload = "<" + htmlTag + " "  + htmlAttribute + "=" + canary + ">";
+                    List<String> gadgetUrls = Utils.enumerateQueryParameters(urlList, "", api.utilities().urlUtils().encode(payload));
+                    enumeratedUrls.addAll(gadgetUrls);
+                }
+            }
             api.logging().logToOutput("Urls:" + enumeratedUrls);
             if (enumeratedUrls.isEmpty()) {
                 api.logging().logToOutput("No query parameters found to scan");
@@ -196,7 +220,7 @@ public class AutoVaderActions {
 
     // Private helper methods
     private void executeScan(List<String> urls, ScanProcessor scanProcessor, ScanType scanType) {
-        AutoVaderExtension.executorService.submit(() -> {
+        executorService.submit(() -> {
             String domInvaderPath = AutoVaderExtension.domInvaderPath;
             String canary = projectCanary;
             int delay = settings.getInteger("Delay MS");
@@ -219,17 +243,17 @@ public class AutoVaderActions {
                 }
                 return;
             }
-
+            boolean isHeadless = settings.getBoolean("Headless");
             api.logging().logToOutput("Scanning " + urlsToScan.size() + " URLs with canary: " + canary);
             DOMInvaderConfig.Profile profile = createScanProfile(canary, scanType);
             new PlaywrightRenderer(new DOMInvaderConfig(profile), deduper, false)
-                    .renderUrls(urlsToScan, domInvaderPath, true, false, true, delay);
+                    .renderUrls(urlsToScan, domInvaderPath, true, isHeadless, true, delay);
             api.logging().logToOutput("Completed scanning " + urlsToScan.size() + " URLs via AutoVader");
         });
     }
 
     private void executeScanForPosts(List<HttpRequestResponse> requestResponses, PostScanProcessor scanProcessor, ScanType scanType) {
-        AutoVaderExtension.executorService.submit(() -> {
+        executorService.submit(() -> {
             String domInvaderPath = AutoVaderExtension.domInvaderPath;
             String canary = projectCanary;
 
@@ -257,15 +281,16 @@ public class AutoVaderActions {
             requestsToScan = requestsToScan.stream().filter(request -> api.scope().isInScope(request.url())).collect(Collectors.toList());
 
             api.logging().logToOutput("Scanning " + requestsToScan.size() + " requests with canary: " + canary);
+            boolean isHeadless = settings.getBoolean("Headless");
             DOMInvaderConfig.Profile profile = createScanProfile(canary, scanType);
             int delay = settings.getInteger("Delay MS");
             new PlaywrightRenderer(new DOMInvaderConfig(profile), deduper, false)
-                    .renderHttpRequests(requestsToScan, domInvaderPath, true, false, true, delay);
+                    .renderHttpRequests(requestsToScan, domInvaderPath, true, isHeadless, true, delay);
             api.logging().logToOutput("Completed scanning " + requestsToScan.size() + " requests via AutoVader");
         });
     }
 
-    private DOMInvaderConfig.Profile createScanProfile(String canary, ScanType scanType) {
+    public static DOMInvaderConfig.Profile createScanProfile(String canary, ScanType scanType) {
         if (scanType == ScanType.WEB_MESSAGE) {
             return DOMInvaderConfig.customProfile(canary)
                     .setEnabled(true)

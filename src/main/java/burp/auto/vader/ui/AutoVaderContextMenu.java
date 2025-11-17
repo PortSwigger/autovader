@@ -1,8 +1,12 @@
 package burp.auto.vader.ui;
 
+import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.message.HttpRequestResponse;
+import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
+import burp.api.montoya.ui.contextmenu.InvocationType;
+import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 import burp.auto.vader.*;
 import burp.auto.vader.actions.AutoVaderActions;
 
@@ -11,6 +15,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static burp.auto.vader.AutoVaderExtension.*;
 
@@ -37,6 +42,33 @@ public class AutoVaderContextMenu implements ContextMenuItemsProvider {
         List<Component> menuItemList = new ArrayList<>();
         JMenu menu = new JMenu(extensionName);
 
+        if(event.messageEditorRequestResponse().isPresent() && event.toolType() == ToolType.REPEATER && event.invocationType() == InvocationType.MESSAGE_EDITOR_REQUEST) {
+            int start;
+            int end;
+            Optional<MessageEditorHttpRequestResponse> editor = event.messageEditorRequestResponse();
+            if(editor.isPresent() && editor.get().selectionOffsets().isPresent()) {
+                start = editor.get().selectionOffsets().get().startIndexInclusive();
+                end = editor.get().selectionOffsets().get().endIndexExclusive();
+            } else if(editor.isPresent()) {
+                start = editor.get().caretPosition();
+                end = editor.get().caretPosition();
+            } else {
+                start = -1;
+                end = -1;
+            }
+            JMenuItem insertCanaryPlaceholder = new JMenuItem("Insert canary placeholder");
+            insertCanaryPlaceholder.addActionListener(e -> {
+                HttpRequest request = event.messageEditorRequestResponse().get().requestResponse().request();
+                String requestStr = request.toString();
+                String modifiedRequest = "";
+                modifiedRequest += requestStr.substring(0, start);
+                modifiedRequest += "$canary";
+                modifiedRequest += requestStr.substring(end);
+                event.messageEditorRequestResponse().get().setRequest(HttpRequest.httpRequest(request.httpService(), modifiedRequest));
+            });
+            menu.add(insertCanaryPlaceholder);
+        }
+
         // Open DOM Invader
         JMenuItem openDomInvaderMenu = new JMenuItem("Open DOM Invader");
         openDomInvaderMenu.setEnabled(event.messageEditorRequestResponse().isPresent());
@@ -57,6 +89,15 @@ public class AutoVaderContextMenu implements ContextMenuItemsProvider {
             }
         });
         menu.add(scanAllQueryParametersMenu);
+
+        JMenuItem scanAllQueryParametersForGadgetsMenu = new JMenuItem("Scan all GET params for gadgets");
+        scanAllQueryParametersForGadgetsMenu.addActionListener(e -> {
+            List<String> urls = AutoVaderActions.extractUrlsFromEvent(event);
+            if (urls != null) {
+                actions.scanAllQueryParametersForGadgets(urls);
+            }
+        });
+        menu.add(scanAllQueryParametersForGadgetsMenu);
 
         // Scan all POST params
         JMenuItem scanAllPostParametersMenu = new JMenuItem("Scan all POST params");

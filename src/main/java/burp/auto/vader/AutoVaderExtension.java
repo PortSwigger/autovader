@@ -33,11 +33,11 @@ public class AutoVaderExtension implements BurpExtension, ExtensionUnloadingHand
     public static String chromiumPath;
     public static DOMInvaderConfig sharedConfig;
     private AutoVaderActions actions;
-    private IssueDeduplicator deduper;
+    public static IssueDeduplicator deduper;
     @Override
     public void initialize(MontoyaApi api) {
         api.extension().setName(extensionName);
-        api.logging().logToOutput(extensionName + " v1.0.1");
+        api.logging().logToOutput(extensionName + " v1.0.8");
         AutoVaderExtension.api = api;
         String canary = api.persistence().extensionData().getString("canary");
         if(canary == null) {
@@ -51,6 +51,7 @@ public class AutoVaderExtension implements BurpExtension, ExtensionUnloadingHand
         api.userInterface().registerContextMenuItemsProvider(new AutoVaderContextMenu(deduper));
         api.userInterface().menuBar().registerMenu(AutoVaderMenuBar.generateMenuBar());
         api.extension().registerUnloadingHandler(this);
+        api.http().registerHttpHandler(new AutoVaderHandler());
         AutoVaderExtension.domInvaderPath = Paths.get(
                 System.getProperty("user.home"),
                 ".BurpSuite",
@@ -65,18 +66,30 @@ public class AutoVaderExtension implements BurpExtension, ExtensionUnloadingHand
                         Path to DOM Invader - If the autodetection fails you can specify a custom path
                         Path to Burp Chromium - If the autodetection fails you can specify a custom path to the executable
                         Payload - The payload to send along with the canary when scanning query parameters
+                        HTML tags to scan - You can scan specific tags for gadgets. Used in conjunction with attributes
+                        Attributes to scan - Scans specific attributes for gadgets.
                         Delay - The amount of delay between requests in ms
                         Always open devtools - Each time the browser window is open the devtools panel will be shown
                         Remove CSP - CSP can break the callbacks that DOM Invader uses to function
+                        Headless - Run scans headlessly
+                        Auto run from Repeater - This runs AutoVader when a Repeater request is sent containing a $canary placeholder
+                        Auto run from Intruder - This runs AutoVader when a Intruder request is sent containing a $canary placeholder
+                        Auto run from other extensions - This runs AutoVader when another extension makes a request is sent containing a $canary placeholder
                         """)
                 .withKeywords("Auto", "Vader", "AutoVader", "AutoVader settings")
                 .withSettings(
                         SettingsPanelSetting.stringSetting("Path to DOM Invader", domInvaderPath),
                         SettingsPanelSetting.stringSetting("Path to Burp Chromium", chromiumPath),
                         SettingsPanelSetting.stringSetting("Payload", ""),
+                        SettingsPanelSetting.stringSetting("HTML tags to scan", "div,b,span"),
+                        SettingsPanelSetting.stringSetting("Attributes to scan", "data-src,title"),
                         SettingsPanelSetting.integerSetting("Delay MS", 0),
                         SettingsPanelSetting.booleanSetting("Always open devtools", false),
-                        SettingsPanelSetting.booleanSetting("Remove CSP", true)
+                        SettingsPanelSetting.booleanSetting("Remove CSP", true),
+                        SettingsPanelSetting.booleanSetting("Headless", false),
+                        SettingsPanelSetting.booleanSetting("Auto run from Repeater", false),
+                        SettingsPanelSetting.booleanSetting("Auto run from Intruder", false),
+                        SettingsPanelSetting.booleanSetting("Auto run from other extensions", false)
                 )
                 .build();
         api.userInterface().registerSettingsPanel(settings);

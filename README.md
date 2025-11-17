@@ -28,6 +28,11 @@ AutoVader adds a context menu to Burp Suite with multiple scanning options. Righ
 - Injects canary values into each parameter
 - Detects DOM-based vulnerabilities from URL inputs
 
+**Scan all GET params for gadgets**
+- Automatically enumerates all query parameters
+- Injects canary into HTML tags and attributes defined in the settings
+- Detects DOM-based gadgets from URL inputs
+
 **Scan all POST params**
 - Automatically enumerates all POST parameters
 - Injects canary values into each parameter
@@ -66,10 +71,16 @@ AutoVader provides project-specific settings accessible through Burp Suite's Set
 - **Path to DOM Invader**: Allows you to overwrite the DOM Invader path if auto-detection fails.
 - **Path to Burp Chromium**: Allows you to overwrite the Chromium path to the executable if auto-detection fails.
 - **Payload**: Custom payload to append to canary values when scanning
+- **HTML tags to scan**: You can scan specific tags for gadgets. Used in conjunction with attributes
+- **Attributes to scan**: Scans specific attributes for gadgets.
 - **Delay**: Delay between requests
 - **Always open devtools**: Each time the browser window is open the devtools panel will be shown
 - **Remove CSP**: Removes Content-Security-Policy headers to ensure DOM Invader functions correctly (enabled by default)
-
+- **Headless**: Run scans headlessly
+- **Auto run from Repeater**: This runs AutoVader when a Repeater request is sent. Note the request should have the $canary placeholder.
+- **Auto run from Intruder**: This runs AutoVader when a Intruder request is sent. Note the request should have the $canary placeholder.
+- **Auto run from other extensions**: This runs AutoVader when another extension makes a request is sent. Note the request should have the $canary placeholder.
+- 
 ### How It Works
 
 1. AutoVader uses Playwright to launch a headless Chromium browser with DOM Invader extension
