@@ -1,0 +1,29 @@
+<p>AutoVader is a Burp Suite extension that integrates DOM Invader with Playwright Java to automatically find DOM-based vulnerabilities in web applications. It provides automated scanning capabilities through context menu actions, allowing security testers to quickly identify client-side security issues without manual DOM Invader interaction.</p>
+
+<h2>Features</h2>
+
+<ul>
+    <li><strong>Automated DOM vulnerability scanning:</strong> No manual DOM Invader interaction needed.</li>
+    <li><strong>Multiple scan profiles:</strong> Optimized settings for different vulnerability types.</li>
+    <li><strong>Issue deduplication:</strong> Prevents duplicate findings across scans.</li>
+    <li><strong>Project-specific canaries:</strong> Unique identifiers per Burp project.</li>
+    <li><strong>Burp integration:</strong> Reports findings directly as Burp Scanner issues.</li>
+    <li><strong>Configurable payloads:</strong> Customize injection payloads via settings.</li>
+</ul>
+
+
+<h2>Usage</h2>
+<p>AutoVader adds a context menu to Burp Suite with multiple scanning options. You can right-click on any request in the Target, Proxy History, or Repeater tabs to access these features:</p>
+
+<ul>
+    <li><strong>Open DOM Invader:</strong> Opens a browser with DOM Invader configured for manual testing. Useful for debugging or custom analysis.</li>
+    <li><strong>Scan all GET params:</strong> Automatically enumerates all query parameters, injects canary values into each parameter, and detects DOM-based vulnerabilities from URL inputs.</li> 
+    <li><strong>Scan for client-side prototype pollution:</strong> Detects prototype pollution vulnerabilities, tests query string, hash, and JSON inputs, and verifies pollution with automated checks.</li>
+    <li><strong>Intercept client-side redirect:</strong> Sets breakpoints on client-side redirects to help identify open redirect vulnerabilities.</li>
+</ul>
+
+<p>AutoVader also provides project-specific settings accessible through Burp Suites Settings, where you can overwrite DOM Invader and Chromium paths, customize payload to append to canary values when scanning, scan specific tags for gadgets, set delay between requests, control viewing of devtools panel, enable or disable headless scanning, and autotrigger AutoVader for requests from Repeater, Intruder or another extension.</p> 
+
+<p>AutoVader then uses Playwright to launch a headless Chromium browser with DOM Invader extension, configures DOM Invader settings based on the selected scan type, navigates the browser to target URLs with appropriate payloads, captures DOM Invader findings via callbacks, reports them as Burp issues, and finally deduplicates issues to prevent duplicate findings.</p> 
+
+<p>AutoVader leverages Playwright Java for browser automation, DOM Invader for vulnerability detection, and Burp Montoya API for extension integration. The extension automatically detects Burps bundled Chromium installation and the DOM Invader extension paths, requiring no manual configuration.</p>
