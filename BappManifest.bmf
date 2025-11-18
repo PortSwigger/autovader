@@ -3,10 +3,10 @@ ExtensionType: 1
 Name: AutoVader
 RepoName: autovader
 ScreenVersion: 1.0.8
-SerialVersion: 1
+SerialVersion: 2
 MinPlatformVersion: 19
 ProOnly: True
-Author: hackvertor
+Author: Gareth Heyes, PortSwigger
 ShortDescription: Automates the use of DOM Invader within Burp Suite to automatically identify DOM-based vulnerabilities in web applications without manual interaction.
 EntryPoint: auto-vader.jar
 BuildCommand: ./gradlew build
