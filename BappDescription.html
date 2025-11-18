@@ -1,29 +1,32 @@
-<p>AutoVader is a Burp Suite extension that integrates DOM Invader with Playwright Java to automatically find DOM-based vulnerabilities in web applications. It provides automated scanning capabilities through context menu actions, allowing security testers to quickly identify client-side security issues without manual DOM Invader interaction.</p>
+<p>
+    AutoVader integrates DOM Invader with Playwright to automatically find DOM-based vulnerabilities through context
+    menu actions. The extension launches an automated browser with DOM Invader configured, injects test payloads, and
+    reports findings as Scanner issues.
+</p>
 
 <h2>Features</h2>
-
 <ul>
-    <li><strong>Automated DOM vulnerability scanning:</strong> No manual DOM Invader interaction needed.</li>
-    <li><strong>Multiple scan profiles:</strong> Optimized settings for different vulnerability types.</li>
-    <li><strong>Issue deduplication:</strong> Prevents duplicate findings across scans.</li>
-    <li><strong>Project-specific canaries:</strong> Unique identifiers per Burp project.</li>
-    <li><strong>Burp integration:</strong> Reports findings directly as Burp Scanner issues.</li>
-    <li><strong>Configurable payloads:</strong> Customize injection payloads via settings.</li>
+    <li>Scan for DOM XSS, prototype pollution, postMessage vulnerabilities, and client-side redirects through automated
+        DOM Invader integration</li>
+    <li>Test GET parameters, POST parameters, web messages, and all identified sources with automatic payload injection
+    </li>
+    <li>Configure custom payloads, HTML tags, attributes to scan, request delays, and headless operation through
+        project-specific settings</li>
+    <li>Auto-trigger scans from Repeater, Intruder, or other extensions using <code class="InlineCode">$canary</code>
+        placeholders in requests</li>
+    <li>Deduplicate findings across scans and report issues directly to Scanner with unique project-specific canaries
+    </li>
+    <li>Automatically detect Chromium and DOM Invader paths with manual override options if needed</li>
 </ul>
-
 
 <h2>Usage</h2>
-<p>AutoVader adds a context menu to Burp Suite with multiple scanning options. You can right-click on any request in the Target, Proxy History, or Repeater tabs to access these features:</p>
-
-<ul>
-    <li><strong>Open DOM Invader:</strong> Opens a browser with DOM Invader configured for manual testing. Useful for debugging or custom analysis.</li>
-    <li><strong>Scan all GET params:</strong> Automatically enumerates all query parameters, injects canary values into each parameter, and detects DOM-based vulnerabilities from URL inputs.</li> 
-    <li><strong>Scan for client-side prototype pollution:</strong> Detects prototype pollution vulnerabilities, tests query string, hash, and JSON inputs, and verifies pollution with automated checks.</li>
-    <li><strong>Intercept client-side redirect:</strong> Sets breakpoints on client-side redirects to help identify open redirect vulnerabilities.</li>
-</ul>
-
-<p>AutoVader also provides project-specific settings accessible through Burp Suites Settings, where you can overwrite DOM Invader and Chromium paths, customize payload to append to canary values when scanning, scan specific tags for gadgets, set delay between requests, control viewing of devtools panel, enable or disable headless scanning, and autotrigger AutoVader for requests from Repeater, Intruder or another extension.</p> 
-
-<p>AutoVader then uses Playwright to launch a headless Chromium browser with DOM Invader extension, configures DOM Invader settings based on the selected scan type, navigates the browser to target URLs with appropriate payloads, captures DOM Invader findings via callbacks, reports them as Burp issues, and finally deduplicates issues to prevent duplicate findings.</p> 
-
-<p>AutoVader leverages Playwright Java for browser automation, DOM Invader for vulnerability detection, and Burp Montoya API for extension integration. The extension automatically detects Burps bundled Chromium installation and the DOM Invader extension paths, requiring no manual configuration.</p>
+<ol>
+    <li>Right-click on any request in Target, Proxy History, or Repeater to access the AutoVader context menu</li>
+    <li>Select a scan type such as "Scan all GET params", "Scan for client side prototype pollution", or "Inject into
+        all sources &amp; click everything"</li>
+    <li>AutoVader launches a browser with DOM Invader, navigates to the target with appropriate payloads, and captures
+        vulnerabilities</li>
+    <li>Review the reported Scanner issues for DOM-based vulnerabilities identified during the automated scan</li>
+    <li>Optionally configure settings like custom payloads, scan delays, and auto-run triggers through the AutoVader
+        Settings panel</li>
+</ol>
